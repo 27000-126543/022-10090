@@ -27,6 +27,7 @@ interface AppState {
   setResult: (result: ReceptionResult | null) => void;
   setViewMode: (mode: ViewMode) => void;
   pushToQueue: (record: ReceptionRecord) => void;
+  markRecordPending: (id: string) => void;
   updateRecordStatus: (id: string, status: RecordStatus, acceptedBy?: string) => void;
   resetForm: () => void;
 }
@@ -64,6 +65,14 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   pushToQueue: (record) => {
     const queue = [record, ...get().queue];
+    saveQueue(queue);
+    set({ queue });
+  },
+
+  markRecordPending: (id) => {
+    const queue = get().queue.map((r) =>
+      r.id === id && r.status === 'pushed' ? { ...r, status: 'pending' as RecordStatus } : r
+    );
     saveQueue(queue);
     set({ queue });
   },

@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
-import { Sparkles, ShieldCheck, ArrowRight, UserCheck } from 'lucide-react';
+import { Sparkles, ShieldCheck, ArrowRight, UserCheck, ClipboardList, Users } from 'lucide-react';
 import { useAppStore } from '../store';
 
 export default function WelcomeStep() {
   const { setStep, queue, setViewMode } = useAppStore();
+
+  const pendingCount = queue.filter((r) => r.status === 'pending').length;
 
   const particles = Array.from({ length: 12 }, (_, i) => ({
     id: i,
@@ -106,21 +108,40 @@ export default function WelcomeStep() {
         </motion.div>
 
         {queue.length > 0 && (
-          <motion.button
-            className="mt-8 flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-sm border border-blush-200 text-ink-500 hover:text-rose-gold hover:border-rose-goldLight transition-all text-sm"
-            onClick={() => setViewMode('consultant')}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+          <motion.div
+            className="mt-10 flex flex-wrap items-center justify-center gap-3"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 1.2 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
           >
-            <UserCheck className="w-4 h-4" />
-            咨询师工作台
-            <span className="ml-1 bg-amber-100 text-amber-600 text-xs px-2 py-0.5 rounded-full">
-              {queue.filter((r) => r.status === 'pending').length} 待接手
-            </span>
-          </motion.button>
+            <motion.button
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-sm border border-blush-200 text-ink-500 hover:text-rose-gold hover:border-rose-goldLight hover:bg-white transition-all text-sm"
+              onClick={() => setViewMode('frontdesk')}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <ClipboardList className="w-4 h-4" />
+              前台队列总览
+              <span className="bg-rose-gold/10 text-rose-gold text-xs px-2 py-0.5 rounded-full">
+                共 {queue.length} 位
+              </span>
+            </motion.button>
+
+            <motion.button
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-sm border border-blush-200 text-ink-500 hover:text-rose-gold hover:border-rose-goldLight hover:bg-white transition-all text-sm"
+              onClick={() => setViewMode('consultant')}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Users className="w-4 h-4" />
+              咨询师工作台
+              {pendingCount > 0 && (
+                <span className="bg-amber-100 text-amber-600 text-xs px-2 py-0.5 rounded-full">
+                  {pendingCount} 待接手
+                </span>
+              )}
+            </motion.button>
+          </motion.div>
         )}
       </motion.div>
     </div>

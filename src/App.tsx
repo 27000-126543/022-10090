@@ -7,6 +7,7 @@ import RiskNoticeStep from './pages/RiskNoticeStep';
 import SubmitStep from './pages/SubmitStep';
 import ReceptionResultStep from './pages/ReceptionResultStep';
 import ConsultantView from './pages/ConsultantView';
+import FrontDeskQueue from './pages/FrontDeskQueue';
 
 const stepVariants = {
   enter: { opacity: 0, x: 50 },
@@ -19,6 +20,9 @@ export default function App() {
 
   if (viewMode === 'consultant') {
     return <ConsultantView />;
+  }
+  if (viewMode === 'frontdesk') {
+    return <FrontDeskQueue />;
   }
 
   const renderStep = () => {

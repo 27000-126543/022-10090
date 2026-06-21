@@ -20,6 +20,12 @@ export interface ReceptionTag {
   color: string;
 }
 
+export interface ProjectItem {
+  name: string;
+  priority: 1 | 2 | 3;
+  reason?: string;
+}
+
 export interface ReceptionResult {
   recommendedCategory: '皮肤管理' | '抗衰光电' | '轮廓咨询';
   tags: ReceptionTag[];
@@ -27,7 +33,9 @@ export interface ReceptionResult {
   consultantType: string;
   submittedAt: string;
   communicationScript: string;
-  recommendedProjects: string[];
+  recommendedProjects: ProjectItem[];
+  projectNames: string[];
+  dealReminder?: string;
 }
 
 export type RecordStatus = 'pushed' | 'pending' | 'accepted';
@@ -44,7 +52,7 @@ export interface ReceptionRecord {
 }
 
 export type StepId = 'welcome' | 'basic' | 'preference' | 'risk' | 'submit' | 'result';
-export type ViewMode = 'tablet' | 'consultant';
+export type ViewMode = 'tablet' | 'consultant' | 'frontdesk';
 
 export const VISIT_PURPOSES = ['首次体验', '定期护理', '项目咨询', '其他'];
 
