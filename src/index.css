@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FDF9F7 0%, #FAF0EB 50%, #F5E6E0 100%);
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-rose-gold to-rose-goldLight text-white font-medium rounded-full px-8 py-3.5 shadow-elegant transition-all duration-300 hover:shadow-glow hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-ink-900 font-medium rounded-full px-8 py-3.5 border border-blush-200 shadow-card transition-all duration-300 hover:border-rose-gold hover:text-rose-gold active:scale-[0.98];
+  }
+
+  .card {
+    @apply bg-white/80 backdrop-blur-sm rounded-3xl shadow-card border border-white/60;
+  }
+
+  .input-field {
+    @apply w-full px-5 py-3.5 rounded-2xl border border-blush-200 bg-blush-50/50 text-ink-900 placeholder-ink-300 focus:outline-none focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 transition-all duration-200 text-base;
+  }
+
+  .option-card {
+    @apply p-4 rounded-2xl border-2 border-blush-200 bg-white cursor-pointer transition-all duration-300 hover:border-rose-goldLight hover:bg-blush-50;
+  }
+
+  .option-card-selected {
+    @apply border-rose-gold bg-gradient-to-br from-blush-50 to-blush-100 shadow-elegant;
+  }
+
+  .tag-chip {
+    @apply inline-flex items-center px-4 py-2 rounded-full text-sm font-medium;
+  }
+
+  .progress-bar {
+    @apply h-2 rounded-full bg-blush-200 overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full bg-gradient-to-r from-rose-gold to-rose-goldLight transition-all duration-500 ease-out;
+  }
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(201, 162, 124, 0.3), rgba(245, 230, 224, 0.5));
+  pointer-events: none;
+}
