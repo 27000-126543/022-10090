@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, CheckCircle2, MapPin, Sparkles } from 'lucide-react';
 import ProgressHeader from '../components/ProgressHeader';
@@ -7,32 +7,46 @@ import StepperNav from '../components/StepperNav';
 import { useAppStore } from '../store';
 import { VISIT_PURPOSES, CONCERN_AREAS, EXPECTED_EFFECTS } from '../types';
 
+const MOCK_CODE = '8888';
+const CODE_COUNTDOWN = 60;
+
 export default function BasicInfoStep() {
   const { questionnaire, updateQuestionnaire, setStep } = useAppStore();
   const [codeSent, setCodeSent] = useState(false);
   const [code, setCode] = useState('');
   const [phoneError, setPhoneError] = useState('');
+  const [codeError, setCodeError] = useState('');
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [countdown]);
 
   const phoneValid = /^1[3-9]\d{9}$/.test(questionnaire.phone);
   const verified = questionnaire.verified;
 
-  const handleSendCode = () => {
+  const handleSendCode = useCallback(() => {
     if (!phoneValid) {
       setPhoneError('请输入正确的手机号');
       return;
     }
     setPhoneError('');
     setCodeSent(true);
-    setTimeout(() => {
-      updateQuestionnaire({ verified: true });
-    }, 1500);
-  };
+    setCodeError('');
+    setCode('');
+    setCountdown(CODE_COUNTDOWN);
+  }, [phoneValid]);
 
-  const handleVerifyCode = () => {
-    if (code === '1234') {
+  const handleVerifyCode = useCallback(() => {
+    if (code === MOCK_CODE) {
+      setCodeError('');
       updateQuestionnaire({ verified: true });
+    } else {
+      setCodeError('验证码错误，请重新输入');
     }
-  };
+  }, [code, updateQuestionnaire]);
 
   const toggleArrayItem = (field: 'concernAreas' | 'expectedEffects', value: string) => {
     const current = questionnaire[field];
@@ -74,9 +88,16 @@ export default function BasicInfoStep() {
                   value={questionnaire.phone}
                   onChange={(e) => {
                     const v = e.target.value.replace(/\D/g, '');
-                    updateQuestionnaire({ phone: v });
+                    updateQuestionnaire({ phone: v, verified: false });
                     setPhoneError('');
+                    if (codeSent) {
+                      setCodeSent(false);
+                      setCode('');
+                      setCodeError('');
+                      setCountdown(0);
+                    }
                   }}
+                  disabled={verified}
                 />
                 {phoneError && (
                   <p className="text-red-400 text-sm mt-2">{phoneError}</p>
@@ -84,15 +105,15 @@ export default function BasicInfoStep() {
               </div>
               {!verified ? (
                 <button
-                  className={`px-6 py-3.5 rounded-2xl font-medium transition-all ${
-                    codeSent
+                  className={`px-6 py-3.5 rounded-2xl font-medium transition-all whitespace-nowrap ${
+                    countdown > 0
                       ? 'bg-blush-100 text-ink-300 cursor-not-allowed'
                       : 'bg-rose-gold text-white hover:bg-rose-goldLight'
                   }`}
                   onClick={handleSendCode}
-                  disabled={codeSent}
+                  disabled={countdown > 0}
                 >
-                  {codeSent ? '已发送' : '获取验证码'}
+                  {countdown > 0 ? `${countdown}s` : codeSent ? '重新发送' : '获取验证码'}
                 </button>
               ) : (
                 <div className="px-6 py-3.5 rounded-2xl bg-green-50 text-green-600 font-medium flex items-center gap-2">
@@ -102,22 +123,42 @@ export default function BasicInfoStep() {
               )}
             </div>
             {codeSent && !verified && (
-              <div className="mt-3 flex gap-3">
-                <input
-                  type="text"
-                  className="input-field flex-1"
-                  placeholder="请输入验证码（提示：1234）"
-                  maxLength={6}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                />
-                <button
-                  className="btn-secondary"
-                  onClick={handleVerifyCode}
-                  disabled={code.length < 4}
-                >
-                  验证
-                </button>
+              <div className="mt-3">
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    className="input-field flex-1"
+                    placeholder="请输入验证码"
+                    maxLength={6}
+                    value={code}
+                    onChange={(e) => {
+                      setCode(e.target.value);
+                      setCodeError('');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && code.length >= 4) handleVerifyCode();
+                    }}
+                  />
+                  <button
+                    className="btn-secondary"
+                    onClick={handleVerifyCode}
+                    disabled={code.length < 4}
+                  >
+                    验证
+                  </button>
+                </div>
+                {codeError && (
+                  <motion.p
+                    className="text-red-400 text-sm mt-2"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {codeError}
+                  </motion.p>
+                )}
+                <p className="text-ink-300 text-xs mt-2">
+                  演示模式：验证码为 {MOCK_CODE}
+                </p>
               </div>
             )}
           </div>

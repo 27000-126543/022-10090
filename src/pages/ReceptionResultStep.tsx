@@ -8,16 +8,43 @@ import {
   CheckCircle2,
   RotateCcw,
   Crown,
+  MessageSquareText,
+  Package,
+  Clock,
+  ListOrdered,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { useAppStore } from '../store';
+import type { ReceptionRecord } from '../types';
+
+const STATUS_CONFIG = {
+  pushed: { label: '已推送', color: 'bg-blue-50 text-blue-600 border-blue-200', dot: 'bg-blue-500' },
+  pending: { label: '待接手', color: 'bg-amber-50 text-amber-600 border-amber-200', dot: 'bg-amber-500' },
+  accepted: { label: '已接手', color: 'bg-green-50 text-green-600 border-green-200', dot: 'bg-green-500' },
+};
+
+function maskPhone(phone: string) {
+  return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
+}
 
 export default function ReceptionResultStep() {
-  const { result, reset } = useAppStore();
+  const { result, questionnaire, queue, pushToQueue, updateRecordStatus, resetForm } = useAppStore();
   const [pushed, setPushed] = useState(false);
+  const [showQueue, setShowQueue] = useState(false);
 
   if (!result) return null;
 
   const handlePush = () => {
+    const record: ReceptionRecord = {
+      id: `rec_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      phone: questionnaire.phone,
+      result,
+      questionnaire: { ...questionnaire },
+      status: 'pushed',
+      pushedAt: new Date().toISOString(),
+    };
+    pushToQueue(record);
     setPushed(true);
   };
 
@@ -27,11 +54,14 @@ export default function ReceptionResultStep() {
     轮廓咨询: '👑',
   }[result.recommendedCategory];
 
+  const currentTime = (iso: string) =>
+    new Date(iso).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
   return (
     <div className="w-full min-h-screen py-10 px-8 flex flex-col">
       <div className="max-w-5xl mx-auto w-full flex-1">
         <motion.div
-          className="text-center mb-10"
+          className="text-center mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -58,7 +88,6 @@ export default function ReceptionResultStep() {
                 </div>
                 <h3 className="font-serif text-xl text-ink-900">推荐咨询方向</h3>
               </div>
-
               <div className="bg-gradient-to-br from-blush-50 via-blush-100 to-blush-50 rounded-3xl p-8 text-center border-2 border-rose-gold/30 shadow-elegant">
                 <div className="text-5xl mb-3">{categoryIcon}</div>
                 <div className="font-serif text-3xl text-rose-goldDark font-semibold mb-2">
@@ -77,7 +106,6 @@ export default function ReceptionResultStep() {
                 </div>
                 <h3 className="font-serif text-xl text-ink-900">接待标签</h3>
               </div>
-
               <div className="flex flex-wrap gap-3">
                 {result.tags.map((tag, i) => (
                   <motion.span
@@ -85,10 +113,47 @@ export default function ReceptionResultStep() {
                     className={`tag-chip ${tag.color}`}
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: 0.3 + i * 0.08 }}
+                    transition={{ duration: 0.3, delay: 0.3 + i * 0.06 }}
                   >
                     {tag.label}
                   </motion.span>
+                ))}
+              </div>
+            </div>
+
+            <div className="card p-6 border-l-4 border-l-rose-gold">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-rose-gold/10 flex items-center justify-center">
+                  <MessageSquareText className="w-5 h-5 text-rose-gold" />
+                </div>
+                <h3 className="font-serif text-xl text-ink-900">优先沟通话术</h3>
+              </div>
+              <p className="text-ink-700 leading-relaxed bg-blush-50 rounded-2xl p-5">
+                {result.communicationScript}
+              </p>
+            </div>
+
+            <div className="card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                  <Package className="w-5 h-5 text-purple-600" />
+                </div>
+                <h3 className="font-serif text-xl text-ink-900">推荐项目方向</h3>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {result.recommendedProjects.map((proj, i) => (
+                  <motion.div
+                    key={i}
+                    className="flex items-center gap-2 px-5 py-3 bg-purple-50 text-purple-700 rounded-xl border border-purple-100 font-medium"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.4 + i * 0.1 }}
+                  >
+                    <span className="w-6 h-6 rounded-full bg-purple-200 text-purple-700 flex items-center justify-center text-xs font-bold">
+                      {i + 1}
+                    </span>
+                    {proj}
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -135,9 +200,7 @@ export default function ReceptionResultStep() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between pb-3 border-b border-blush-100">
                   <span className="text-ink-500">提交时间</span>
-                  <span className="text-ink-900 font-medium">
-                    {result.submittedAt.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                  <span className="text-ink-900 font-medium">{currentTime(result.submittedAt)}</span>
                 </div>
                 <div className="flex justify-between pb-3 border-b border-blush-100">
                   <span className="text-ink-500">咨询方向</span>
@@ -186,16 +249,95 @@ export default function ReceptionResultStep() {
                     >
                       <CheckCircle2 className="w-7 h-7 text-white" strokeWidth={2.5} />
                     </motion.div>
-                    <div className="font-serif text-lg text-green-700 mb-1">已成功推送</div>
-                    <div className="text-green-600 text-sm">{result.consultantType}将很快接待您</div>
+                    <div className="font-serif text-lg text-green-700 mb-1">已推送至接待队列</div>
+                    <div className="text-green-600 text-sm">{result.consultantType}待接手</div>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
+            <div className="card overflow-hidden">
+              <button
+                className="w-full p-5 flex items-center justify-between hover:bg-blush-50 transition-colors"
+                onClick={() => setShowQueue(!showQueue)}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-rose-gold/10 flex items-center justify-center">
+                    <ListOrdered className="w-4 h-4 text-rose-gold" />
+                  </div>
+                  <span className="font-serif text-base text-ink-900">接待队列</span>
+                  <span className="tag-chip bg-blush-100 text-rose-goldDark text-xs py-1 px-2">
+                    {queue.length}
+                  </span>
+                </div>
+                {showQueue ? (
+                  <ChevronUp className="w-5 h-5 text-ink-300" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-ink-300" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {showQueue && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-5 pb-5 space-y-3 max-h-80 overflow-y-auto">
+                      {queue.length === 0 && (
+                        <p className="text-ink-300 text-sm text-center py-4">暂无接待记录</p>
+                      )}
+                      {queue.map((rec) => {
+                        const sc = STATUS_CONFIG[rec.status];
+                        return (
+                          <div
+                            key={rec.id}
+                            className="flex items-center gap-3 p-3 bg-blush-50 rounded-xl"
+                          >
+                            <div className={`w-2 h-2 rounded-full ${sc.dot}`} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-ink-900 text-sm font-medium truncate">
+                                  {maskPhone(rec.phone)}
+                                </span>
+                                <span className="text-ink-300 text-xs">{currentTime(rec.pushedAt)}</span>
+                              </div>
+                              <div className="text-ink-500 text-xs">{rec.result.recommendedCategory}</div>
+                            </div>
+                            <span className={`tag-chip text-xs py-1 px-2 border ${sc.color}`}>
+                              {sc.label}
+                            </span>
+                            {rec.status === 'pushed' && (
+                              <button
+                                className="text-xs text-rose-gold hover:underline whitespace-nowrap"
+                                onClick={() => updateRecordStatus(rec.id, 'pending')}
+                              >
+                                标记待接手
+                              </button>
+                            )}
+                            {rec.status === 'pending' && (
+                              <button
+                                className="text-xs text-green-600 hover:underline whitespace-nowrap"
+                                onClick={() => updateRecordStatus(rec.id, 'accepted')}
+                              >
+                                标记已接手
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <button
               className="w-full card p-4 flex items-center justify-center gap-2 text-ink-500 hover:text-rose-gold hover:border-rose-goldLight transition-all border-2 border-transparent"
-              onClick={reset}
+              onClick={resetForm}
             >
               <RotateCcw className="w-4 h-4" />
               <span>重新开始新问卷</span>

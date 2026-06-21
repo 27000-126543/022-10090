@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Sparkles, ShieldCheck, ArrowRight, UserCheck } from 'lucide-react';
 import { useAppStore } from '../store';
 
 export default function WelcomeStep() {
-  const setStep = useAppStore((s) => s.setStep);
+  const { setStep, queue, setViewMode } = useAppStore();
 
   const particles = Array.from({ length: 12 }, (_, i) => ({
     id: i,
@@ -104,6 +104,24 @@ export default function WelcomeStep() {
           <ShieldCheck className="w-4 h-4" />
           <span>您的信息将被严格保密，仅用于面诊参考</span>
         </motion.div>
+
+        {queue.length > 0 && (
+          <motion.button
+            className="mt-8 flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-sm border border-blush-200 text-ink-500 hover:text-rose-gold hover:border-rose-goldLight transition-all text-sm"
+            onClick={() => setViewMode('consultant')}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1.2 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <UserCheck className="w-4 h-4" />
+            咨询师工作台
+            <span className="ml-1 bg-amber-100 text-amber-600 text-xs px-2 py-0.5 rounded-full">
+              {queue.filter((r) => r.status === 'pending').length} 待接手
+            </span>
+          </motion.button>
+        )}
       </motion.div>
     </div>
   );

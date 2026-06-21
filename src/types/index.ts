@@ -11,7 +11,7 @@ export interface QuestionnaireData {
   dealIntention: string;
 }
 
-export type TagType = 'category' | 'preference' | 'warning' | 'urgency' | 'experience';
+export type TagType = 'category' | 'preference' | 'warning' | 'urgency' | 'experience' | 'project';
 
 export interface ReceptionTag {
   id: string;
@@ -25,10 +25,26 @@ export interface ReceptionResult {
   tags: ReceptionTag[];
   avoidPoints: string[];
   consultantType: string;
-  submittedAt: Date;
+  submittedAt: string;
+  communicationScript: string;
+  recommendedProjects: string[];
+}
+
+export type RecordStatus = 'pushed' | 'pending' | 'accepted';
+
+export interface ReceptionRecord {
+  id: string;
+  phone: string;
+  result: ReceptionResult;
+  questionnaire: QuestionnaireData;
+  status: RecordStatus;
+  pushedAt: string;
+  acceptedAt?: string;
+  acceptedBy?: string;
 }
 
 export type StepId = 'welcome' | 'basic' | 'preference' | 'risk' | 'submit' | 'result';
+export type ViewMode = 'tablet' | 'consultant';
 
 export const VISIT_PURPOSES = ['首次体验', '定期护理', '项目咨询', '其他'];
 

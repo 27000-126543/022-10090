@@ -6,6 +6,7 @@ import PreferenceStep from './pages/PreferenceStep';
 import RiskNoticeStep from './pages/RiskNoticeStep';
 import SubmitStep from './pages/SubmitStep';
 import ReceptionResultStep from './pages/ReceptionResultStep';
+import ConsultantView from './pages/ConsultantView';
 
 const stepVariants = {
   enter: { opacity: 0, x: 50 },
@@ -14,7 +15,11 @@ const stepVariants = {
 };
 
 export default function App() {
-  const currentStep = useAppStore((s) => s.currentStep);
+  const { currentStep, viewMode } = useAppStore();
+
+  if (viewMode === 'consultant') {
+    return <ConsultantView />;
+  }
 
   const renderStep = () => {
     switch (currentStep) {
